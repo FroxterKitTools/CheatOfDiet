@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CHEATOFDIET</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{forest:'#4F7D32',gold:'#FFD16A',honey:'#F5B52E',crimson:'#D9361E',app:'#F8F9FA'},fontFamily:{sans:['Poppins','Inter','system-ui','sans-serif']},borderRadius:{xl:'12px'}}}}
+</script>
+<style>
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:#F8F9FA;color:#1f2a17;font-family:Poppins,Inter,system-ui,sans-serif}
+.card{background:#fff;border:2px solid #F5B52E;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:transform .2s}
+.card:hover{transform:translateY(-3px)}
+.card:hover .ph{transform:scale(1.12)}
+.ph{transition:transform .3s;display:inline-block}
+.btn{border-radius:12px;font-weight:700;padding:.55rem 1rem;transition:transform .15s}
+.btn:active{transform:scale(.94)}
+.cta{background:#FFD16A;color:#4F7D32;box-shadow:0 0 14px rgba(255,209,106,.9)}
+.add{background:#D9361E;color:#fff}
+.sec{background:#F5B52E;color:#1f2a17}
+.inp{width:100%;border:2px solid #e5e7eb;border-radius:12px;padding:.6rem .8rem;outline:none}
+.inp:focus{border-color:#4F7D32}
+.view{display:none}.view.on{display:block;animation:fade .3s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+#drawer{transform:translateX(100%);transition:transform .3s}#drawer.open{transform:none}
+.bump{animation:bump .35s}@keyframes bump{50%{transform:scale(1.5)}}
+.chip.active{background:#4F7D32;color:#fff}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="pb-20 md:pb-0">
+<!-- HEADER -->
+<header class="sticky top-0 z-30 bg-forest text-white shadow-lg" style="padding-top:env(safe-area-inset-top,0px)">
+ <div class="max-w-6xl mx-auto px-3 py-2 flex items-center gap-2 flex-wrap">
+  <a href="#" onclick="go('home');return false" class="font-extrabold text-xl flex items-center gap-1">🥗 CHEAT<span class="text-gold">OF</span>DIET</a>
+  <div class="flex bg-white/20 rounded-full p-1 text-sm">
+   <button id="mDel" onclick="setMode('Delivery')" class="px-3 py-1 rounded-full font-semibold">Delivery</button>
+   <button id="mPick" onclick="setMode('Pickup')" class="px-3 py-1 rounded-full font-semibold">Pickup</button>
+  </div>
+  <button onclick="openStores()" id="storeLbl" class="text-xs underline">📍 Choose store</button>
+  <input id="q" oninput="search(this.value)" placeholder="Search menu…" class="inp !w-auto flex-1 min-w-[140px] !py-1 text-gray-800 order-last md:order-none">
+  <span class="bg-gold text-forest font-bold text-xs rounded-full px-2 py-1">⭐ <span id="pts">0</span> pts</span>
+  <button onclick="openAuth()" id="acct" class="text-sm font-semibold">👤 Log in</button>
+  <button onclick="toggleCart(1)" class="relative text-xl" aria-label="Cart">🛒<span id="cnt" class="absolute -top-2 -right-3 bg-crimson text-white text-xs rounded-full w-5 h-5 grid place-items-center">0</span></button>
+ </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-3 py-4">
+<!-- HOME -->
+<section id="v-home" class="view">
+ <div id="hero" class="rounded-xl overflow-hidden relative h-44 md:h-64"></div>
+ <div id="cats" class="flex gap-4 overflow-x-auto py-4 sticky top-[52px] bg-app z-20"></div>
+ <h2 class="text-xl font-bold mb-2">Best sellers</h2>
+ <div id="best" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+ <h2 class="text-xl font-bold mt-6 mb-2">Top deals</h2>
+ <div id="deals" class="grid md:grid-cols-3 gap-3"></div>
+</section>
+<!-- MENU -->
+<section id="v-menu" class="view">
+ <div id="chips" class="flex gap-2 overflow-x-auto pb-3"></div>
+ <div id="menuGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+</section>
+<!-- CHECKOUT -->
+<section id="v-checkout" class="view max-w-xl mx-auto">
+ <div id="ckSteps" class="flex justify-between text-xs font-semibold mb-3"></div>
+ <div id="ckBody" class="card p-4"></div>
+</section>
+<!-- TRACK -->
+<section id="v-track" class="view max-w-xl mx-auto">
+ <h2 class="text-xl font-bold mb-2">Track order</h2>
+ <div class="flex gap-2"><input id="tid" class="inp" placeholder="Order ID e.g. COD-1234"><button class="btn cta" onclick="doTrack()">Track</button></div>
+ <div id="tres" class="card p-4 mt-3 hidden"></div>
+</section>
+<!-- INFO -->
+<section id="v-info" class="view max-w-2xl mx-auto"><div id="infoBody" class="card p-5 leading-relaxed"></div></section>
+</main>
+
+<footer class="bg-forest text-white mt-8 py-6 text-center text-sm">
+ <p class="font-bold">CHEATOFDIET · Guilt-free cravings, delivered fast.</p>
+ <div class="flex justify-center gap-4 flex-wrap mt-2 underline">
+  <a href="#" onclick="info('stores');return false">Store locator</a><a href="#" onclick="go('track');return false">Track order</a><a href="#" onclick="info('about');return false">About us</a><a href="#" onclick="info('terms');return false">Terms</a><a href="#" onclick="info('privacy');return false">Privacy</a>
+ </div>
+</footer>
+
+<!-- MOBILE NAV -->
+<nav class="md:hidden fixed bottom-0 inset-x-0 bg-forest text-white grid grid-cols-5 text-xs z-30" style="padding-bottom:env(safe-area-inset-bottom,0px)">
+ <button class="py-2" onclick="go('home')">🏠<br>Home</button><button class="py-2" onclick="go('menu')">🍔<br>Menu</button>
+ <button class="py-2" onclick="toast('You have '+pts()+' reward points. 10 pts per Rs 100.')">⭐<br>Rewards</button>
+ <button class="py-2" onclick="toggleCart(1)">🛒<br>Cart</button><button class="py-2" onclick="openAuth()">👤<br>Profile</button>
+</nav>
+
+<!-- CART DRAWER -->
+<div id="shade" onclick="closeAll()" class="fixed inset-0 bg-black/50 z-40 hidden"></div>
+<aside id="drawer" class="fixed top-0 right-0 h-full w-full max-w-sm bg-white z-50 flex flex-col">
+ <div class="bg-forest text-white p-3 flex justify-between"><b>Your cart</b><button onclick="toggleCart(0)">✕</button></div>
+ <div id="cartBody" class="flex-1 overflow-y-auto p-3"></div>
+ <div id="cartFoot" class="p-3 border-t"></div>
+</aside>
+
+<!-- GENERIC MODAL -->
+<div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center p-3"><div class="absolute inset-0 bg-black/50" onclick="closeAll()"></div><div id="mbody" class="relative bg-white rounded-xl p-5 w-full max-w-md max-h-[90vh] overflow-y-auto"></div></div>
+<div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 bg-forest text-white px-4 py-2 rounded-xl z-[60] hidden shadow-lg"></div>
+
+<script>
+/* ---------- DATA ---------- */
+const CATS=[['everyday','Everyday Value','💸'],['burgers','Burgers & Combos','🍔'],['boxes','Signature Boxes','📦'],['buckets','Sharing Buckets','🪣'],['sides','Sides & Condiments','🍟'],['snacks','Snacks & Beverages','🥤'],['midnight','Midnight Deals','🌙']];
+const P=[
+ [1,'everyday','Zinger Lite Burger','Grilled-style fillet, lettuce, light mayo',390,'🍔'],
+ [2,'everyday','Wrap & Fries','Chicken wrap with seasoned fries',450,'🌯'],
+ [3,'burgers','Double Stack Combo','Two patties, cheese, fries, drink',770,'🍔'],
+ [4,'burgers','Crispy Chicken Combo','Crispy fillet, fries, drink',690,'🍗'],
+ [5,'boxes','Signature Box','Burger, 2 strips, fries, dip, drink',990,'📦'],
+ [6,'boxes','Mighty Box','Burger, wings, fries, drink',1090,'🎁'],
+ [7,'buckets','Family Bucket (8 pc)','8 pieces, 2 large fries, 1.5L drink',2490,'🪣'],
+ [8,'buckets','Party Bucket (12 pc)','12 pieces, 3 fries, 2 drinks',3290,'🍗'],
+ [9,'sides','Loaded Fries','Fries, cheese sauce, jalapeño',290,'🍟'],
+ [10,'sides','Coleslaw','Fresh cabbage, carrot, creamy dressing',150,'🥗'],
+ [11,'snacks','Hot Wings (6 pc)','Spicy wings with dip',420,'🔥'],
+ [12,'snacks','Iced Tea','Peach iced tea, 500ml',160,'🥤'],
+ [13,'midnight','Midnight Burger + Fries','Available after 10 PM',590,'🌙'],
+ [14,'midnight','Midnight Wings Box','12 wings, 2 dips',1190,'🌙']];
+const DEALS=[['Weekend Feast','Family Bucket + Loaded Fries',3200,2790],['Duo Deal','2 Zinger Lite + 2 drinks',1100,890],['Midnight Special','Burger + Wings after 10 PM',1250,990]];
+const SLIDES=[['Weekly combo deals','Save up to 25% on every combo','Order now'],['Flash sale: 2 hours only','Duo Deal at Rs 890','Grab it'],['Loyalty rewards','Earn 10 points per Rs 100 spent','Start earning']];
+const OPTS={drink:[['Pepsi',0],['7Up',0],['Water',0]],extra:[['Extra cheese',80],['Upgrade to loaded fries',120],['Garlic dip',50],['Chili dip',50]]};
+const STORES=['Gulberg, Lahore','DHA Phase 5, Lahore','Clifton, Karachi','F-7, Islamabad','Saddar, Rawalpindi'];
+const STAGES=['Order placed','Kitchen preparing','Out for delivery','Delivered'];
+/* ---------- FOOD ILLUSTRATIONS (inline SVG, no external files) ---------- */
+const DR='<g transform="translate(TX,TY) rotate(ROT)"><ellipse rx="18" ry="13" fill="#C77B30"/><ellipse cx="-5" cy="-5" rx="9" ry="4" fill="#E09A4A"/><rect x="14" y="-3" width="18" height="6" rx="3" fill="#fff"/><circle cx="33" cy="-3" r="4" fill="#fff"/><circle cx="33" cy="3" r="4" fill="#fff"/></g>';
+const BURGER='<ellipse cx="50" cy="72" rx="36" ry="4" fill="rgba(0,0,0,.12)"/><path d="M20 58h60v4a8 8 0 0 1-8 8H28a8 8 0 0 1-8-8z" fill="#F5B52E"/><rect x="17" y="48" width="66" height="11" rx="5.5" fill="#6b3a1e"/><path d="M18 44h64l-6 8-8-6-8 6-8-6-8 6-8-6-8 6z" fill="#FFD16A"/><path d="M16 42q6-7 12 0t12 0 12 0 12 0 12 0v3H16z" fill="#4F7D32"/><path d="M18 42C18 20 82 20 82 42z" fill="#F5B52E"/><path d="M26 34C30 26 40 24 46 24" stroke="#FFE9A8" stroke-width="3" fill="none" stroke-linecap="round"/><g fill="#FFF3C9"><ellipse cx="42" cy="31" rx="3" ry="1.6"/><ellipse cx="56" cy="28" rx="3" ry="1.6"/><ellipse cx="66" cy="34" rx="3" ry="1.6"/><ellipse cx="50" cy="37" rx="3" ry="1.6"/></g>';
+const FOODS={
+ burger:BURGER,
+ moon:BURGER+'<path d="M82 6a12 12 0 1 0 8 19 10 10 0 0 1-8-19z" fill="#FFD16A"/>',
+ wrap:'<ellipse cx="50" cy="72" rx="36" ry="4" fill="rgba(0,0,0,.12)"/><rect x="14" y="34" width="72" height="30" rx="15" transform="rotate(-14 50 49)" fill="#F0D29A"/><ellipse cx="78" cy="34" rx="7" ry="14" transform="rotate(-14 78 34)" fill="#4F7D32"/><circle cx="78" cy="31" r="4" fill="#D9361E"/><path d="M24 56l50-14" stroke="#D9B672" stroke-width="3" stroke-linecap="round"/>',
+ box:'<ellipse cx="50" cy="73" rx="36" ry="3.5" fill="rgba(0,0,0,.12)"/><g fill="#FFD16A"><rect x="30" y="8" width="6" height="22" rx="2"/><rect x="39" y="4" width="6" height="26" rx="2"/><rect x="48" y="9" width="6" height="21" rx="2"/><rect x="57" y="5" width="6" height="25" rx="2"/><rect x="66" y="10" width="6" height="20" rx="2"/></g><path d="M18 36h64l-6 34H24z" fill="#D9361E"/><rect x="14" y="28" width="72" height="10" rx="3" fill="#F5B52E"/><circle cx="50" cy="54" r="8" fill="#FFD16A"/>',
+ bucket:'<ellipse cx="50" cy="73" rx="32" ry="3.5" fill="rgba(0,0,0,.12)"/><g fill="#C77B30"><ellipse cx="34" cy="24" rx="13" ry="11"/><ellipse cx="50" cy="18" rx="13" ry="11"/><ellipse cx="66" cy="24" rx="13" ry="11"/></g><ellipse cx="50" cy="15" rx="7" ry="3" fill="#E09A4A"/><path d="M24 32h52l-6 38H30z" fill="#D9361E"/><rect x="38" y="34" width="8" height="32" fill="#fff"/><rect x="56" y="34" width="8" height="32" fill="#fff"/><rect x="21" y="30" width="58" height="6" rx="3" fill="#F5B52E"/>',
+ fries:'<ellipse cx="50" cy="73" rx="30" ry="3.5" fill="rgba(0,0,0,.12)"/><g fill="#FFD16A" stroke="#F5B52E" stroke-width=".8"><rect x="30" y="12" width="6" height="30" rx="2" transform="rotate(-12 33 30)"/><rect x="38" y="6" width="6" height="36" rx="2"/><rect x="46" y="10" width="6" height="32" rx="2"/><rect x="54" y="5" width="6" height="37" rx="2"/><rect x="62" y="13" width="6" height="29" rx="2" transform="rotate(12 65 30)"/></g><path d="M28 40h44l-5 32H33z" fill="#D9361E"/><path d="M40 50h20l-1 10H41z" fill="#FFD16A"/>',
+ slaw:'<ellipse cx="50" cy="73" rx="32" ry="3.5" fill="rgba(0,0,0,.12)"/><path d="M18 42h64a32 28 0 0 1-64 0z" fill="#fff" stroke="#4F7D32" stroke-width="3"/><ellipse cx="50" cy="42" rx="32" ry="9" fill="#d6eab0"/><g fill="#F5B52E"><rect x="32" y="36" width="9" height="3" rx="1.5"/><rect x="50" y="39" width="9" height="3" rx="1.5"/><rect x="62" y="35" width="9" height="3" rx="1.5"/></g><g fill="#4F7D32"><rect x="40" y="41" width="10" height="3" rx="1.5"/><rect x="58" y="43" width="9" height="3" rx="1.5"/></g>',
+ wings:'<ellipse cx="50" cy="72" rx="38" ry="4" fill="rgba(0,0,0,.12)"/>'+DR.replace('TX','38').replace('TY','28').replace('ROT','-25')+DR.replace('TX','46').replace('TY','52').replace('ROT','15'),
+ drink:'<ellipse cx="50" cy="73" rx="22" ry="3.5" fill="rgba(0,0,0,.12)"/><rect x="52" y="4" width="5" height="20" rx="2.5" transform="rotate(12 54 14)" fill="#4F7D32"/><path d="M32 26h36l-4 44H36z" fill="#D9361E"/><path d="M33.5 42h33l-1.5 14H35z" fill="#fff"/><rect x="29" y="20" width="42" height="8" rx="3" fill="#F5B52E"/>'
+};
+const FMAP={'🍔':'burger','💸':'burger','🌙':'moon','🌯':'wrap','📦':'box','🎁':'box','🪣':'bucket','🍗':'wings','🔥':'wings','🍟':'fries','🥗':'slaw','🥤':'drink'};
+const food=(e,s=96)=>`<svg viewBox="0 0 100 80" width="${s}" height="${s*.8}" role="img" aria-label="food illustration">${FOODS[FMAP[e]||'burger']}</svg>`;
+/* ---------- STATE ---------- */
+const ls=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let cart=ls('cod_cart',[]),mode=ls('cod_mode','Delivery'),user=ls('cod_user',null),store=ls('cod_store',null),orders=ls('cod_orders',{});
+let curCat='all',query='',ck={step:1,data:{},pay:'COD'},slide=0,curP=null;
+const $=id=>document.getElementById(id),rs=n=>'Rs '+n.toLocaleString('en-PK');
+const pts=()=>ls('cod_pts',0);
+/* ---------- NAV ---------- */
+function go(v){closeAll();document.querySelectorAll('.view').forEach(e=>e.classList.remove('on'));$('v-'+v).classList.add('on');scrollTo(0,0);if(v=='menu')renderMenu();if(v=='checkout')renderCk()}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.add('hidden'),2200)}
+function closeAll(){$('modal').classList.add('hidden');$('modal').classList.remove('flex');toggleCart(0)}
+function modal(h){$('mbody').innerHTML=h;$('modal').classList.remove('hidden');$('modal').classList.add('flex')}
+function setMode(m){mode=m;sv('cod_mode',m);$('mDel').className='px-3 py-1 rounded-full font-semibold '+(m=='Delivery'?'bg-gold text-forest':'');$('mPick').className='px-3 py-1 rounded-full font-semibold '+(m=='Pickup'?'bg-gold text-forest':'');renderCart()}
+/* ---------- HOME ---------- */
+function card(p){return `<div class="card p-3 flex flex-col"><div class="text-5xl text-center py-4 bg-app rounded-xl overflow-hidden"><span class="ph">${food(p[5],110)}</span></div><b class="mt-2 text-sm">${p[2]}</b><p class="text-xs text-gray-500 flex-1">${p[3]}</p><div class="flex items-center justify-between mt-2"><span class="font-bold text-honey">${rs(p[4])}</span><button class="btn add text-xs" onclick="openProd(${p[0]})">ADD TO CART</button></div></div>`}
+function renderHome(){
+ $('cats').innerHTML=CATS.map(c=>`<button onclick="curCat='${c[0]}';go('menu')" class="shrink-0 text-center w-20"><span class="block w-16 h-16 mx-auto rounded-full bg-white border-2 border-honey grid place-items-center overflow-hidden">${food(c[2],46)}</span><span class="text-xs font-semibold">${c[1]}</span></button>`).join('');
+ $('best').innerHTML=P.filter(p=>[3,5,7,11].includes(p[0])).map(card).join('');
+ $('deals').innerHTML=DEALS.map(d=>`<div class="card p-4"><span class="bg-crimson text-white text-xs font-bold rounded-full px-2 py-1">Save ${rs(d[2]-d[3])}</span><b class="block mt-2">${d[0]}</b><p class="text-sm text-gray-500">${d[1]}</p><p class="mt-2"><s class="text-gray-400">${rs(d[2])}</s> <b class="text-honey text-lg">${rs(d[3])}</b></p><button class="btn add mt-2 text-sm" onclick="addRaw('${d[0]}',${d[3]},'Deal')">ADD TO CART</button></div>`).join('')}
+function heroTick(){const s=SLIDES[slide];$('hero').innerHTML=`<div class="absolute inset-0 bg-gradient-to-r from-forest to-forest/70 text-white p-6 flex flex-col justify-center"><span class="bg-crimson text-xs font-bold rounded-full px-2 py-1 w-fit">Limited time</span><h1 class="text-2xl md:text-4xl font-extrabold mt-2">${s[0]}</h1><p>${s[1]}</p><button class="btn cta mt-3 w-fit" onclick="go('menu')">${s[2]}</button></div><div class="absolute bottom-2 right-3 flex gap-1">${SLIDES.map((_,i)=>`<i class="w-2 h-2 rounded-full ${i==slide?'bg-gold':'bg-white/50'}"></i>`).join('')}</div>`;slide=(slide+1)%SLIDES.length}
+/* ---------- MENU ---------- */
+function search(v){query=v.toLowerCase();go('menu')}
+function renderMenu(){
+ $('chips').innerHTML=[['all','All']].concat(CATS).map(c=>`<button onclick="curCat='${c[0]}';renderMenu()" class="chip shrink-0 px-3 py-1 rounded-full bg-white border-2 border-forest text-sm font-semibold ${curCat==c[0]?'active':''}">${c[1]}</button>`).join('');
+ const l=P.filter(p=>(curCat=='all'||p[1]==curCat)&&(p[2]+p[3]).toLowerCase().includes(query));
+ $('menuGrid').innerHTML=l.length?l.map(card).join(''):'<p class="col-span-full text-center text-gray-500 py-10">No items match. Clear the search or pick another category.</p>'}
+function openProd(id){curP=P.find(p=>p[0]==id);
+ const opt=(n,g)=>`<label class="flex justify-between py-1"><span><input type="${g=='d'?'radio':'checkbox'}" name="${g}" value="${n[0]}" data-p="${n[1]}" onchange="calcP()" ${g=='d'&&n[0]=='Pepsi'?'checked':''}> ${n[0]}</span><span class="text-sm text-gray-500">${n[1]?'+'+rs(n[1]):''}</span></label>`;
+ modal(`<div class="flex justify-center">${food(curP[5],150)}</div><h3 class="font-bold text-lg">${curP[2]}</h3><p class="text-sm text-gray-500">${curP[3]}</p><p class="font-semibold mt-3">Choose a drink</p>${OPTS.drink.map(o=>opt(o,'d')).join('')}<p class="font-semibold mt-3">Customize</p>${OPTS.extra.map(o=>opt(o,'x')).join('')}<div class="flex items-center gap-3 mt-4"><button class="btn sec" onclick="qtyP(-1)">−</button><b id="pq">1</b><button class="btn sec" onclick="qtyP(1)">+</button><button class="btn add flex-1" onclick="addProd()">Add to cart · <span id="pt"></span></button></div>`);calcP()}
+let pq=1;function qtyP(d){pq=Math.max(1,pq+d);$('pq').textContent=pq;calcP()}
+function calcP(){let t=curP[4];document.querySelectorAll('#mbody input:checked').forEach(i=>t+=+i.dataset.p);$('pt').textContent=rs(t*pq);return t}
+function addProd(){const t=calcP(),o=[...document.querySelectorAll('#mbody input:checked')].map(i=>i.value).join(', ');addRaw(curP[2],t,o,pq);pq=1;closeAll_m()}
+function closeAll_m(){$('modal').classList.add('hidden');$('modal').classList.remove('flex')}
+/* ---------- CART ---------- */
+function addRaw(name,price,opts,q=1){const k=name+'|'+opts,i=cart.find(c=>c.k==k);i?i.q+=q:cart.push({k,name,price,opts,q});sv('cod_cart',cart);renderCart();const c=$('cnt');c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump');toast('Added '+name)}
+function qty(i,d){cart[i].q+=d;if(cart[i].q<1)cart.splice(i,1);sv('cod_cart',cart);renderCart()}
+const sub=()=>cart.reduce((s,c)=>s+c.price*c.q,0),FREE=2000,FEE=150;
+const fee=()=>mode=='Pickup'||sub()>=FREE||!cart.length?0:FEE;
+function renderCart(){
+ $('cnt').textContent=cart.reduce((s,c)=>s+c.q,0);
+ $('cartBody').innerHTML=cart.length?cart.map((c,i)=>`<div class="flex justify-between items-center py-2 border-b"><div class="text-sm"><b>${c.name}</b><p class="text-xs text-gray-500">${c.opts||''}</p><span class="text-honey font-bold">${rs(c.price)}</span></div><div class="flex items-center gap-2"><button class="btn sec !px-2 !py-0" onclick="qty(${i},-1)">−</button>${c.q}<button class="btn sec !px-2 !py-0" onclick="qty(${i},1)">+</button></div></div>`).join(''):'<p class="text-center text-gray-500 mt-10">Your cart is empty. Add something from the menu.</p>';
+ const left=Math.max(0,FREE-sub()),pc=Math.min(100,sub()/FREE*100);
+ $('cartFoot').innerHTML=`${mode=='Delivery'?`<p class="text-xs">${left?`Add ${rs(left)} more for free delivery`:'🎉 Free delivery unlocked'}</p><div class="h-2 bg-gray-200 rounded-full mb-2"><div class="h-2 bg-forest rounded-full" style="width:${pc}%"></div></div>`:''}<div class="flex justify-between text-sm"><span>Subtotal</span><span>${rs(sub())}</span></div><div class="flex justify-between text-sm"><span>${mode} fee</span><span>${rs(fee())}</span></div><div class="flex justify-between font-bold"><span>Total</span><span>${rs(sub()+fee())}</span></div><button ${cart.length?'':'disabled'} class="btn cta w-full mt-2 disabled:opacity-40" onclick="ck={step:1,data:{},pay:'COD'};go('checkout')">Checkout</button>`}
+function toggleCart(o){$('drawer').classList.toggle('open',!!o);$('shade').classList.toggle('hidden',!o)}
+/* ---------- CHECKOUT ---------- */
+function renderCk(){
+ const S=['Details','Timing','Payment','Done'];
+ $('ckSteps').innerHTML=S.map((s,i)=>`<span class="${i+1<=ck.step?'text-forest':'text-gray-400'}">${i+1<ck.step?'✓':i+1}. ${s}</span>`).join('');
+ const b=$('ckBody');
+ if(!cart.length&&ck.step<4){b.innerHTML='<p class="text-center">Your cart is empty.</p><button class="btn cta mt-3" onclick="go(\'menu\')">Browse menu</button>';return}
+ if(ck.step==1)b.innerHTML=`<h3 class="font-bold mb-2">Contact & ${mode.toLowerCase()} info</h3><div class="space-y-2"><input id="f1" class="inp" placeholder="Full name" value="${ck.data.name||user||''}"><input id="f2" class="inp" type="tel" placeholder="Phone (03XX XXXXXXX)" value="${ck.data.phone||''}"><input id="f3" class="inp" placeholder="${mode=='Pickup'?'Pickup store (optional)':'Exact delivery address'}" value="${ck.data.addr||''}"><input id="f4" class="inp" placeholder="Instructions (gate, floor, landmark)" value="${ck.data.note||''}"></div><p id="err" class="text-crimson text-sm mt-2"></p><button class="btn cta w-full mt-3" onclick="ck1()">Continue</button>`;
+ if(ck.step==2)b.innerHTML=`<h3 class="font-bold mb-2">Order type & timing</h3>${['Immediate '+mode.toLowerCase()+' (30–40 min)','Scheduled (pick a time)'].map((t,i)=>`<label class="flex gap-2 py-2"><input type="radio" name="t" value="${i}" ${(ck.data.t||0)==i?'checked':''} onchange="ck.data.t=${i};$('sch').classList.toggle('hidden',${i}==0)"> ${t}</label>`).join('')}<input id="sch" type="time" class="inp mt-1 ${ck.data.t==1?'':'hidden'}" value="${ck.data.time||'20:00'}"><button class="btn cta w-full mt-3" onclick="ck.data.time=$('sch').value;ck.step=3;renderCk()">Continue</button>`;
+ if(ck.step==3)b.innerHTML=`<h3 class="font-bold mb-2">Payment</h3><p class="text-xs text-gray-500 mb-2">Simulation only. Nothing is charged and card details are not stored.</p><div class="grid grid-cols-3 gap-2 mb-3">${[['COD','Cash on delivery'],['CARD','Card'],['WALLET','Wallet']].map(p=>`<button class="chip btn border-2 border-forest text-xs ${ck.pay==p[0]?'active':''}" onclick="ck.pay='${p[0]}';renderCk()">${p[1]}</button>`).join('')}</div>${ck.pay=='CARD'?`<div class="space-y-2"><input class="inp" inputmode="numeric" maxlength="19" placeholder="Card number"><div class="flex gap-2"><input class="inp" placeholder="MM/YY" maxlength="5"><input class="inp" placeholder="CVV" maxlength="4" type="password"></div></div>`:ck.pay=='WALLET'?`<select class="inp"><option>JazzCash</option><option>Easypaisa</option></select><input class="inp mt-2" placeholder="Wallet number">`:'<p class="text-sm">Pay in cash when your order arrives.</p>'}<div class="flex justify-between font-bold mt-3"><span>Total</span><span>${rs(sub()+fee())}</span></div><button class="btn w-full mt-2 text-lg" style="background:#FFD16A;color:#4F7D32;border:2px solid #4F7D32" onclick="place()">Place order</button>`;
+ if(ck.step==4)doneView(b)}
+function ck1(){const d={name:$('f1').value.trim(),phone:$('f2').value.trim(),addr:$('f3').value.trim(),note:$('f4').value.trim()};
+ if(!d.name||!/^[0-9+\-\s]{10,14}$/.test(d.phone)||(mode=='Delivery'&&!d.addr)){$('err').textContent='Enter your name, a valid phone number'+(mode=='Delivery'?' and delivery address.':'.');return}
+ Object.assign(ck.data,d);ck.step=2;renderCk()}
+function place(){const id='COD-'+Math.floor(1000+Math.random()*9000),o={id,items:cart,total:sub()+fee(),mode,t:Date.now(),name:ck.data.name};orders[id]=o;sv('cod_orders',orders);sv('cod_pts',pts()+Math.floor(sub()/10));$('pts').textContent=pts();ck.id=id;cart=[];sv('cod_cart',cart);renderCart();ck.step=4;renderCk()}
+function tracker(o){const el=(Date.now()-o.t)/1000,st=Math.min(3,Math.floor(el/20));return `<div class="space-y-2">${STAGES.map((s,i)=>`<div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full grid place-items-center text-xs font-bold ${i<=st?'bg-forest text-white':'bg-gray-200'}">${i<=st?'✓':i+1}</span><span class="${i==st?'font-bold':'text-gray-500'}">${s}</span></div>`).join('')}</div><p class="text-sm mt-2">${st<3?'Estimated arrival: about '+Math.max(5,35-Math.floor(el/20)*10)+' min':'Enjoy your meal!'}</p>`}
+function doneView(b){const o=orders[ck.id];b.innerHTML=`<h3 class="font-bold text-lg text-forest">Order confirmed 🎉</h3><p>Order ID: <b>${o.id}</b> · earned ${Math.floor(o.total/10)} pts</p><div class="my-3" id="live">${tracker(o)}</div><div class="border-t pt-2 text-sm">${o.items.map(c=>`<div class="flex justify-between"><span>${c.q}× ${c.name}</span><span>${rs(c.price*c.q)}</span></div>`).join('')}<div class="flex justify-between font-bold mt-1"><span>Total</span><span>${rs(o.total)}</span></div></div><button class="btn cta mt-3" onclick="go('home')">Back to home</button>`;clearInterval(doneView.i);doneView.i=setInterval(()=>{const l=$('live');l?l.innerHTML=tracker(o):clearInterval(doneView.i)},4000)}
+function doTrack(){const o=orders[$('tid').value.trim().toUpperCase()],r=$('tres');r.classList.remove('hidden');r.innerHTML=o?`<b>${o.id}</b> · ${rs(o.total)}<div class="mt-2">${tracker(o)}</div>`:'<p class="text-crimson">No order found on this device. Check the ID and try again.</p>'}
+/* ---------- INFO / STORES / AUTH ---------- */
+function info(k){const T={about:['About us','<p>CHEATOFDIET is a demo brand built on one idea: comfort food with better ingredients. We use fresh produce and trans-fat-free oil.</p><h4 class="font-bold mt-3">Mitao Bhook</h4><p>A proposed community program: for every 20 orders, one meal goes to a family in need. (Placeholder copy; define a real program before launch.)</p>'],terms:['Terms & Conditions','<p>1. Prices are in PKR and may change. 2. Delivery times are estimates. 3. Orders can be cancelled before the kitchen starts preparing. 4. Reward points have no cash value. (Placeholder text; have a lawyer draft the real terms.)</p>'],privacy:['Privacy Policy','<p>We collect your name, phone and address only to fulfil orders. Card details are never stored. You can request deletion at any time. (Placeholder text.)</p>'],stores:['Store locator','<div class="h-40 bg-gray-200 rounded-xl grid place-items-center mb-3">🗺️ Map placeholder</div><input class="inp mb-2" placeholder="Search city or area" oninput="[...document.querySelectorAll(\'.st\')].forEach(e=>e.style.display=e.textContent.toLowerCase().includes(this.value.toLowerCase())?\'\':\'none\')">'+STORES.map(s=>`<button class="st block w-full text-left py-2 border-b" onclick="setStore('${s}')">📍 ${s}</button>`).join('')]}[k];$('infoBody').innerHTML=`<h2 class="text-xl font-bold mb-2">${T[0]}</h2>${T[1]}`;go('info')}
+function setStore(s){store=s;sv('cod_store',s);$('storeLbl').textContent='📍 '+s;closeAll();toast('Store set: '+s)}
+function openStores(){modal('<h3 class="font-bold mb-2">Select a store</h3>'+STORES.map(s=>`<button class="block w-full text-left py-2 border-b" onclick="setStore('${s}')">📍 ${s}</button>`).join(''))}
+function openAuth(){if(user){modal(`<h3 class="font-bold">Hi, ${user}</h3><p class="text-sm">Reward points: ${pts()}</p><button class="btn sec mt-3" onclick="user=null;sv('cod_user',null);$('acct').textContent='👤 Log in';closeAll()">Log out</button>`);return}
+ modal('<h3 class="font-bold mb-2">Log in or sign up</h3><input id="un" class="inp mb-2" placeholder="Your name"><input class="inp mb-2" placeholder="Phone number"><button class="btn cta w-full" onclick="const n=$(\'un\').value.trim();if(n){user=n;sv(\'cod_user\',n);$(\'acct\').textContent=\'👤 \'+n;closeAll()}">Continue</button><p class="text-xs text-gray-500 mt-2">Demo only. No account is created.</p>')}
+/* ---------- INIT ---------- */
+renderHome();renderCart();setMode(mode);heroTick();setInterval(heroTick,4500);$('pts').textContent=pts();
+if(user)$('acct').textContent='👤 '+user;if(store)$('storeLbl').textContent='📍 '+store;
+go('home');
+</script>
+</body>
+</html>
